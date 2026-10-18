@@ -3,9 +3,117 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>WebP Press</title>
-<meta name="description" content="Convierte JPG, PNG y otros formatos a WebP comprimido directo en tu navegador. Sin subir nada a ningún servidor.">
+
+<!-- ── Identidad ── -->
+<title>WiPi Converter – Convierte imágenes a WebP gratis y sin subir nada</title>
+<meta name="description" content="Convierte JPG, PNG, BMP, AVIF y GIF a WebP comprimido directamente en tu navegador. Sin servidores, sin registro, 100 % privado. Ahorra hasta un 80 % de peso en tus imágenes.">
+<meta name="keywords" content="convertir imágenes a webp, conversor webp gratis, jpg a webp, png a webp, comprimir imágenes, WiPi Converter">
+<meta name="author" content="WiPi Converter">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://wipi-converter.netlify.app/">
+
+<!-- ── Open Graph ── -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://wipi-converter.netlify.app/">
+<meta property="og:title" content="WiPi Converter – Convierte imágenes a WebP gratis">
+<meta property="og:description" content="Convierte JPG, PNG, BMP, AVIF y GIF a WebP comprimido directamente en tu navegador. Sin servidores, sin registro, 100 % privado.">
+<meta property="og:image" content="https://wipi-converter.netlify.app/og-image.png">
+<meta property="og:locale" content="es_CO">
+<meta property="og:site_name" content="WiPi Converter">
+
+<!-- ── Twitter / X ── -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:site" content="@wipiconverter">
+<meta name="twitter:title" content="WiPi Converter – Convierte imágenes a WebP gratis">
+<meta name="twitter:description" content="Convierte JPG, PNG, BMP, AVIF y GIF a WebP comprimido directamente en tu navegador. Sin servidores, 100 % privado.">
+<meta name="twitter:image" content="https://wipi-converter.netlify.app/og-image.png">
+
+<!-- ── Favicon SVG inline via data URI ── -->
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%238b5cf6'/%3E%3Ctext x='16' y='22' font-family='system-ui' font-weight='700' font-size='16' fill='white' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%238b5cf6'/%3E%3Ctext x='16' y='22' font-family='system-ui' font-weight='700' font-size='16' fill='white' text-anchor='middle'%3EW%3C/text%3E%3C/svg%3E">
+
+<!-- ── Color de tema (móvil) ── -->
+<meta name="theme-color" content="#09090b">
 <meta name="color-scheme" content="dark">
+
+<!-- ── Schema.org – WebApplication (GenerativeAI SEO) ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "WiPi Converter",
+  "url": "https://wipi-converter.netlify.app/",
+  "description": "Herramienta gratuita para convertir imágenes JPG, PNG, BMP, AVIF y GIF a formato WebP comprimido directamente en el navegador, sin subir archivos a ningún servidor.",
+  "applicationCategory": "MultimediaApplication",
+  "operatingSystem": "Any",
+  "browserRequirements": "Requires JavaScript. Chrome, Firefox, Safari, Edge.",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  },
+  "featureList": [
+    "Conversión de JPG a WebP",
+    "Conversión de PNG a WebP",
+    "Conversión de BMP, AVIF y GIF a WebP",
+    "Control de calidad de compresión",
+    "Redimensionamiento de imágenes",
+    "Descarga en ZIP",
+    "Procesamiento 100% local en el navegador",
+    "Sin registro ni inicio de sesión"
+  ],
+  "inLanguage": "es",
+  "isAccessibleForFree": true,
+  "privacyPolicy": "Ningún archivo se envía a servidores externos. Todo el procesamiento ocurre en el dispositivo del usuario.",
+  "creator": {
+    "@type": "Organization",
+    "name": "WiPi Converter"
+  }
+}
+</script>
+
+<!-- ── Schema.org – FAQPage (GenerativeAI SEO) ── -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "¿Qué es el formato WebP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "WebP es un formato de imagen moderno desarrollado por Google que ofrece compresión superior a JPEG y PNG, tanto con pérdida como sin ella. Las imágenes WebP son en promedio un 25–35 % más pequeñas que las JPEG de calidad equivalente."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Se suben mis imágenes a algún servidor?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "No. WiPi Converter procesa todo directamente en tu navegador usando la API de Canvas de JavaScript. Ningún archivo sale de tu dispositivo."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué formatos puedo convertir a WebP?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Puedes convertir JPG, JPEG, PNG, BMP, AVIF, GIF y WebP. Los GIF animados se convierten usando el primer fotograma."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "¿Qué calidad debo usar?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Para la mayoría de imágenes web, una calidad entre 75 y 85 ofrece una apariencia casi idéntica al original con un peso significativamente menor. Para imágenes de producto o fotografía artística, usa 85–90."
+      }
+    }
+  ]
+}
+</script>
+
 <style>
 :root{
   --bg:#09090b; --panel:#111114; --panel2:#17171c; --line:#26262c;
@@ -115,13 +223,25 @@ button:disabled{opacity:.5;cursor:not-allowed}
 @keyframes shine{from{background-position:200% 0}to{background-position:-200% 0}}
 .note{color:var(--mut);font-size:12.5px;margin-top:28px;line-height:1.7}
 .note b{color:var(--text)}
+
+/* ── FAQ accesible ── */
+.faq{margin-top:56px}
+.faq h2{font-size:22px;letter-spacing:-.02em;margin-bottom:20px}
+.faq details{border:1px solid var(--line);border-radius:12px;margin-bottom:10px;padding:0}
+.faq details[open]{background:var(--panel)}
+.faq summary{padding:16px 18px;cursor:pointer;font-weight:600;font-size:15px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary::after{content:"+";font-size:20px;color:var(--acc);line-height:1}
+.faq details[open] summary::after{content:"−"}
+.faq .ans{padding:0 18px 18px;color:var(--mut);font-size:14px;line-height:1.7}
+
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="logo"><i></i> WebP Press</div>
+    <div class="logo"><i></i> WiPi Converter</div>
     <h1>Convierte tus imágenes a <span>WebP</span> en segundos</h1>
     <p class="sub">Arrastra JPG, PNG, BMP, AVIF o GIF, ajusta la calidad y descarga archivos mucho más livianos. Todo ocurre en tu navegador, nada se sube a ningún servidor.</p>
   </header>
@@ -174,6 +294,31 @@ button:disabled{opacity:.5;cursor:not-allowed}
     <b>Tip:</b> si una imagen ya era un WebP liviano, el resultado puede pesar más; en ese caso verás un aviso amarillo y puedes bajar la calidad o quedarte con el original.<br>
     Los GIF animados se convierten solo en su primer cuadro. Formatos como HEIC dependen de si tu navegador puede abrirlos.
   </p>
+
+  <!-- FAQ visible + Schema FAQ arriba para GEO -->
+  <section class="faq" aria-label="Preguntas frecuentes">
+    <h2>Preguntas frecuentes</h2>
+
+    <details>
+      <summary>¿Qué es el formato WebP?</summary>
+      <div class="ans">WebP es un formato de imagen moderno creado por Google que ofrece compresión superior a JPEG y PNG. Las imágenes WebP son en promedio un 25–35 % más pequeñas que las JPEG de calidad equivalente, lo que hace las páginas web más rápidas.</div>
+    </details>
+
+    <details>
+      <summary>¿Se suben mis imágenes a algún servidor?</summary>
+      <div class="ans">No. WiPi Converter procesa todo directamente en tu navegador usando la API Canvas de JavaScript. Ningún archivo sale de tu dispositivo. No hay servidores, no hay registro, no hay cookies de rastreo.</div>
+    </details>
+
+    <details>
+      <summary>¿Qué formatos puedo convertir a WebP?</summary>
+      <div class="ans">JPG, JPEG, PNG, BMP, AVIF, GIF y WebP existentes. Los GIF animados se convierten usando el primer fotograma. HEIC y HEIF funcionan si tu navegador los soporta (Chrome en iOS 17+ y Safari en macOS).</div>
+    </details>
+
+    <details>
+      <summary>¿Qué calidad debo usar?</summary>
+      <div class="ans">Para imágenes web generales, una calidad de 75–85 ofrece una apariencia casi idéntica al original con un peso significativamente menor. Para fotografía de producto o imágenes de alta fidelidad, usa 85–90.</div>
+    </details>
+  </section>
 </div>
 
 <script>
