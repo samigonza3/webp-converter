@@ -1,6 +1,34 @@
 <!doctype html>
 <html lang="es">
 <head>
+<!-- Google tag (gtag.js): misma propiedad GA4 que samuelgonzalez.org -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-3T9MQBQJKD"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  // Consent Mode v2: todo denegado hasta que el visitante decide en el banner.
+  var consent = null;
+  try { consent = localStorage.getItem('cookie-consent'); } catch (e) {}
+  var granted = consent === 'granted' ? 'granted' : 'denied';
+  gtag('consent', 'default', {
+    ad_storage: granted, ad_user_data: granted, ad_personalization: granted,
+    analytics_storage: granted, wait_for_update: 500
+  });
+  gtag('js', new Date());
+  // content_group + site_section identifican esta herramienta dentro de la misma propiedad.
+  gtag('config', 'G-3T9MQBQJKD', {
+    page_title: 'WebP Converter',
+    content_group: 'webp-converter',
+    site_section: 'webp-converter'
+  });
+  // Evento propio: solo envia datos si el visitante acepto analitica.
+  function track(name, params){
+    params = params || {};
+    params.site_section = 'webp-converter';
+    gtag('event', name, params);
+  }
+</script>
+
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -235,6 +263,16 @@ button:disabled{opacity:.5;cursor:not-allowed}
 .faq details[open] summary::after{content:"−"}
 .faq .ans{padding:0 18px 18px;color:var(--mut);font-size:14px;line-height:1.7}
 
+/* ── Banner de cookies ── */
+.cc{position:fixed;left:16px;right:16px;bottom:16px;z-index:50;max-width:420px;margin-left:auto;
+  background:rgba(17,17,20,.96);border:1px solid var(--line);border-radius:14px;padding:16px;
+  box-shadow:0 10px 40px rgba(0,0,0,.5);backdrop-filter:blur(8px)}
+.cc p{margin:0 0 12px;font-size:13px;color:var(--mut);line-height:1.6}
+.cc div{display:flex;gap:8px}
+.cc button{flex:1;cursor:pointer;border-radius:10px;padding:9px 14px;font:600 13px system-ui;border:1px solid var(--line);
+  background:var(--panel2);color:var(--text)}
+.cc button.ok{background:var(--acc);border-color:var(--acc);color:#fff}
+.cc[hidden]{display:none}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -306,7 +344,7 @@ button:disabled{opacity:.5;cursor:not-allowed}
 
     <details>
       <summary>¿Se suben mis imágenes a algún servidor?</summary>
-      <div class="ans">No. WiPi Converter procesa todo directamente en tu navegador usando la API Canvas de JavaScript. Ningún archivo sale de tu dispositivo. No hay servidores, no hay registro, no hay cookies de rastreo.</div>
+      <div class="ans">No. WiPi Converter procesa todo directamente en tu navegador usando la API Canvas de JavaScript. Ningún archivo sale de tu dispositivo. No hay servidores ni registro. Solo se usa analítica anónima de uso (con tu permiso) para mejorar la herramienta.</div>
     </details>
 
     <details>
@@ -321,9 +359,29 @@ button:disabled{opacity:.5;cursor:not-allowed}
   </section>
 </div>
 
+<div class="cc" id="cc" role="dialog" aria-live="polite" aria-label="Preferencias de cookies" hidden>
+  <p>Uso cookies de analítica anónima para saber cuánto se usa esta herramienta y mejorarla. Tus imágenes nunca se suben ni se envían a ningún servidor.</p>
+  <div><button type="button" class="ok" id="ccOk">Aceptar</button><button type="button" id="ccNo">Rechazar</button></div>
+</div>
+
 <script>
 const $ = s => document.querySelector(s);
 const state = { items: [], quality: 80, maxW: 0, gen: 0 };
+
+/* ---------- consentimiento de cookies ---------- */
+(function(){
+  const cc = $('#cc');
+  let c = null;
+  try { c = localStorage.getItem('cookie-consent'); } catch (e) {}
+  if (c === null) cc.hidden = false;
+  const decide = v => {
+    gtag('consent', 'update', { analytics_storage: v, ad_storage: v, ad_user_data: v, ad_personalization: v });
+    try { localStorage.setItem('cookie-consent', v); } catch (e) {}
+    cc.hidden = true;
+  };
+  $('#ccOk').addEventListener('click', () => decide('granted'));
+  $('#ccNo').addEventListener('click', () => decide('denied'));
+})();
 let uid = 0, running = false, timer = null;
 
 const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
@@ -343,6 +401,7 @@ function addFiles(list){
       status: 'pending'
     });
   }
+  track('webp_files_added', { files_count: files.length });
   renderAll();
   processAll();
 }
@@ -375,6 +434,7 @@ async function convert(item){
     item.url = URL.createObjectURL(blob);
     item.w = w; item.h = h;
     item.status = 'done';
+    track('webp_converted', { quality: state.quality, max_width: state.maxW, original_kb: Math.round(item.file.size/1024), webp_kb: Math.round(blob.size/1024) });
   } catch (e) {
     item.status = 'error';
     item.error = e && e.message ? e.message : 'No se pudo leer la imagen';
@@ -536,6 +596,7 @@ $('#zip').addEventListener('click', async () => {
     document.body.appendChild(a);
     a.click();
     a.remove();
+    track('webp_zip_download', { files_count: done.length });
     setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   } catch (e) {
     alert(e.message || 'No se pudo crear el ZIP');
