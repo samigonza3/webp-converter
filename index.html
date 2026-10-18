@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WebP Press</title>
+<meta name="description" content="Convierte JPG, PNG y otros formatos a WebP comprimido directo en tu navegador. Sin subir nada a ningún servidor.">
+<meta name="color-scheme" content="dark">
+<style>
+:root{
+  --bg:#09090b; --panel:#111114; --panel2:#17171c; --line:#26262c;
+  --text:#f4f4f5; --mut:#a1a1aa; --acc:#8b5cf6; --acc2:#22d3ee;
+  --ok:#34d399; --warn:#fbbf24; --err:#f87171;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{
+  background:
+    radial-gradient(900px 400px at 15% -10%, rgba(139,92,246,.18), transparent 60%),
+    radial-gradient(800px 400px at 95% 0%, rgba(34,211,238,.12), transparent 60%),
+    var(--bg);
+  color:var(--text);
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  min-height:100vh;
+}
+.wrap{max-width:1040px;margin:0 auto;padding:40px 16px 80px}
+header{margin-bottom:28px}
+.logo{display:inline-flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-.02em;font-size:22px}
+.logo i{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,var(--acc),var(--acc2));display:inline-block}
+h1{font-size:clamp(28px,5vw,44px);line-height:1.1;letter-spacing:-.03em;margin:18px 0 10px}
+h1 span{background:linear-gradient(90deg,var(--acc),var(--acc2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{color:var(--mut);max-width:620px;margin:0}
+
+/* tarjeta con sombras en capas (estilo shadow card) */
+.panel{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 10px 30px -12px rgba(0,0,0,.7),0 2px 6px rgba(0,0,0,.4);
+}
+.controls{display:grid;grid-template-columns:1fr 1fr;gap:20px;padding:20px;margin-bottom:16px}
+@media(max-width:640px){.controls{grid-template-columns:1fr}}
+.field label{display:flex;justify-content:space-between;font-weight:600;font-size:14px;margin-bottom:10px}
+.field label output{color:var(--acc2);font-variant-numeric:tabular-nums}
+.hint{color:var(--mut);font-size:12.5px;margin:8px 0 0}
+input[type=range]{width:100%;accent-color:var(--acc)}
+select{
+  width:100%;background:var(--panel2);color:var(--text);border:1px solid var(--line);
+  border-radius:10px;padding:10px 12px;font:inherit
+}
+
+.drop{
+  display:block;text-align:center;padding:48px 20px;cursor:pointer;
+  border:1.5px dashed #3a3a44;border-radius:16px;background:rgba(255,255,255,.015);
+  transition:border-color .2s,background .2s,transform .2s;
+}
+.drop:hover,.drop:focus-within{border-color:var(--acc);background:rgba(139,92,246,.06)}
+.drop.over{border-color:var(--acc2);background:rgba(34,211,238,.08);transform:scale(1.005)}
+.drop strong{display:block;font-size:18px;margin:10px 0 4px}
+.drop small{color:var(--mut)}
+.drop svg{width:40px;height:40px;stroke:var(--acc);fill:none;stroke-width:1.6}
+.drop input{position:absolute;opacity:0;width:1px;height:1px}
+
+.summary{
+  display:none;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:14px 18px;margin:20px 0 14px;
+}
+.summary.show{display:flex}
+.stats{display:flex;gap:22px;flex-wrap:wrap}
+.stat span{display:block;color:var(--mut);font-size:12px}
+.stat b{font-size:17px;font-variant-numeric:tabular-nums}
+.stat b.good{color:var(--ok)}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+button,.btn{
+  font:inherit;font-weight:600;font-size:14px;border-radius:10px;padding:9px 14px;cursor:pointer;
+  border:1px solid var(--line);background:var(--panel2);color:var(--text);text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;transition:filter .15s,border-color .15s;
+}
+button:hover,.btn:hover{border-color:#3f3f4a}
+.primary{background:linear-gradient(135deg,var(--acc),#6d5ae6);border-color:transparent;color:#fff}
+.primary:hover{filter:brightness(1.1)}
+button:disabled{opacity:.5;cursor:not-allowed}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.card{overflow:hidden;display:flex;flex-direction:column}
+.thumb{
+  position:relative;aspect-ratio:4/3;overflow:hidden;
+  background:
+    conic-gradient(#1b1b21 25%,#15151a 0 50%,#1b1b21 0 75%,#15151a 0) 0 0/16px 16px;
+}
+.thumb img{width:100%;height:100%;object-fit:contain;display:block}
+/* revelado al pasar el mouse (estilo shift card) */
+.reveal{
+  position:absolute;inset:auto 0 0 0;padding:28px 12px 10px;
+  background:linear-gradient(transparent,rgba(0,0,0,.85));
+  transform:translateY(60%);opacity:0;transition:transform .25s ease,opacity .25s ease;
+  font-size:12.5px;color:#e4e4e7;
+}
+.card:hover .reveal,.card:focus-within .reveal{transform:none;opacity:1}
+.badge{
+  position:absolute;top:10px;right:10px;font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;
+  background:rgba(52,211,153,.18);color:var(--ok);border:1px solid rgba(52,211,153,.35);backdrop-filter:blur(6px);
+}
+.badge.warn{background:rgba(251,191,36,.16);color:var(--warn);border-color:rgba(251,191,36,.35)}
+.badge.err{background:rgba(248,113,113,.16);color:var(--err);border-color:rgba(248,113,113,.35)}
+.body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:6px;flex:1}
+.name{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{color:var(--mut);font-size:13px;font-variant-numeric:tabular-nums}
+.meta.err{color:var(--err)}
+.row{display:flex;gap:8px;margin-top:auto;padding-top:8px}
+.row .btn,.row button{flex:1;padding:7px 10px;font-size:13px}
+.working .thumb::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(110deg,transparent 30%,rgba(255,255,255,.08) 50%,transparent 70%);
+  background-size:200% 100%;animation:shine 1.1s linear infinite;
+}
+@keyframes shine{from{background-position:200% 0}to{background-position:-200% 0}}
+.note{color:var(--mut);font-size:12.5px;margin-top:28px;line-height:1.7}
+.note b{color:var(--text)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo"><i></i> WebP Press</div>
+    <h1>Convierte tus imágenes a <span>WebP</span> en segundos</h1>
+    <p class="sub">Arrastra JPG, PNG, BMP, AVIF o GIF, ajusta la calidad y descarga archivos mucho más livianos. Todo ocurre en tu navegador, nada se sube a ningún servidor.</p>
+  </header>
+
+  <section class="panel controls" aria-label="Ajustes">
+    <div class="field">
+      <label for="q">Calidad <output id="qOut">80</output></label>
+      <input id="q" type="range" min="1" max="100" value="80">
+      <p class="hint">75 a 85 suele verse igual que el original y pesa mucho menos.</p>
+    </div>
+    <div class="field">
+      <label for="w">Ancho máximo</label>
+      <select id="w">
+        <option value="0">Mantener tamaño original</option>
+        <option value="3840">3840 px (4K)</option>
+        <option value="2560">2560 px</option>
+        <option value="1920">1920 px (Full HD)</option>
+        <option value="1600">1600 px</option>
+        <option value="1280">1280 px</option>
+        <option value="1080">1080 px</option>
+        <option value="800">800 px</option>
+      </select>
+      <p class="hint">Reducir el ancho ahorra aún más peso. Nunca se agranda una imagen.</p>
+    </div>
+  </section>
+
+  <label class="drop" id="drop" tabindex="0">
+    <input id="file" type="file" accept="image/*" multiple>
+    <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5"/><path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+    <strong>Suelta tus imágenes aquí</strong>
+    <small>o haz clic para elegirlas. También puedes pegar con Ctrl+V</small>
+  </label>
+
+  <section class="panel summary" id="summary" aria-live="polite">
+    <div class="stats">
+      <div class="stat"><span>Imágenes</span><b id="sCount">0</b></div>
+      <div class="stat"><span>Peso original</span><b id="sOrig">0 B</b></div>
+      <div class="stat"><span>Peso WebP</span><b id="sNew">0 B</b></div>
+      <div class="stat"><span>Ahorro</span><b id="sSave" class="good">0%</b></div>
+    </div>
+    <div class="actions">
+      <button id="zip" class="primary" disabled>Descargar todo (ZIP)</button>
+      <button id="clear">Limpiar</button>
+    </div>
+  </section>
+
+  <section class="grid" id="grid" aria-label="Resultados"></section>
+
+  <p class="note">
+    <b>Tip:</b> si una imagen ya era un WebP liviano, el resultado puede pesar más; en ese caso verás un aviso amarillo y puedes bajar la calidad o quedarte con el original.<br>
+    Los GIF animados se convierten solo en su primer cuadro. Formatos como HEIC dependen de si tu navegador puede abrirlos.
+  </p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const state = { items: [], quality: 80, maxW: 0, gen: 0 };
+let uid = 0, running = false, timer = null;
+
+const fmt = b => b < 1024 ? b + ' B' : b < 1048576 ? (b / 1024).toFixed(1) + ' KB' : (b / 1048576).toFixed(2) + ' MB';
+
+/* ---------- entrada de archivos ---------- */
+function isImage(f){
+  return f.type.startsWith('image/') || /\.(jpe?g|png|gif|bmp|avif|webp|tiff?|heic|heif)$/i.test(f.name);
+}
+function addFiles(list){
+  const files = [...list].filter(isImage);
+  if (!files.length) return;
+  for (const f of files){
+    state.items.push({
+      id: ++uid, file: f,
+      base: f.name.replace(/\.[^.]+$/, '') || 'imagen',
+      origUrl: URL.createObjectURL(f),
+      status: 'pending'
+    });
+  }
+  renderAll();
+  processAll();
+}
+
+/* ---------- conversión ---------- */
+async function convert(item){
+  const gen = state.gen;
+  item.status = 'working';
+  updateCard(item);
+  try {
+    if (!item.bitmap) item.bitmap = await createImageBitmap(item.file);
+    const bw = item.bitmap.width, bh = item.bitmap.height;
+    let w = bw, h = bh;
+    if (state.maxW > 0 && bw > state.maxW){
+      w = state.maxW;
+      h = Math.max(1, Math.round(bh * state.maxW / bw));
+    }
+    const c = document.createElement('canvas');
+    c.width = w; c.height = h;
+    const ctx = c.getContext('2d');
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(item.bitmap, 0, 0, w, h);
+    const blob = await new Promise(r => c.toBlob(r, 'image/webp', state.quality / 100));
+    if (!blob || blob.type !== 'image/webp') throw new Error('Tu navegador no puede exportar a WebP');
+    if (!state.items.includes(item)) return;
+    if (gen !== state.gen){ item.status = 'pending'; return; }
+    if (item.url) URL.revokeObjectURL(item.url);
+    item.blob = blob;
+    item.url = URL.createObjectURL(blob);
+    item.w = w; item.h = h;
+    item.status = 'done';
+  } catch (e) {
+    item.status = 'error';
+    item.error = e && e.message ? e.message : 'No se pudo leer la imagen';
+  }
+  updateCard(item);
+}
+
+async function processAll(force){
+  if (force){
+    state.gen++;
+    state.items.forEach(i => { if (i.status !== 'error') i.status = 'pending'; });
+  }
+  if (running) return;
+  running = true;
+  try {
+    let next;
+    while ((next = state.items.find(i => i.status === 'pending'))){
+      await convert(next);
+      updateSummary();
+    }
+  } finally {
+    running = false;
+    updateSummary();
+  }
+}
+
+/* ---------- interfaz ---------- */
+function buildCard(item){
+  const el = document.createElement('article');
+  el.className = 'panel card ' + item.status;
+  el.dataset.id = item.id;
+
+  const thumb = document.createElement('div');
+  thumb.className = 'thumb';
+  const img = document.createElement('img');
+  img.alt = '';
+  img.src = item.status === 'done' ? item.url : item.origUrl;
+  thumb.appendChild(img);
+
+  const body = document.createElement('div');
+  body.className = 'body';
+  const name = document.createElement('div');
+  name.className = 'name';
+  name.title = item.file.name;
+  name.textContent = item.base + '.webp';
+  const meta = document.createElement('div');
+  meta.className = 'meta';
+  body.append(name, meta);
+
+  if (item.status === 'done'){
+    const pct = (1 - item.blob.size / item.file.size) * 100;
+    const badge = document.createElement('span');
+    badge.className = 'badge' + (pct < 0 ? ' warn' : '');
+    badge.textContent = pct >= 0 ? '-' + pct.toFixed(0) + '%' : '+' + Math.abs(pct).toFixed(0) + '%';
+    thumb.appendChild(badge);
+
+    const rev = document.createElement('div');
+    rev.className = 'reveal';
+    rev.textContent = item.w + ' x ' + item.h + ' px · ' + item.file.name;
+    thumb.appendChild(rev);
+
+    meta.textContent = fmt(item.file.size) + ' → ' + fmt(item.blob.size);
+  } else if (item.status === 'error'){
+    const badge = document.createElement('span');
+    badge.className = 'badge err';
+    badge.textContent = 'Error';
+    thumb.appendChild(badge);
+    meta.classList.add('err');
+    meta.textContent = item.error;
+  } else {
+    meta.textContent = 'Convirtiendo...';
+  }
+
+  const row = document.createElement('div');
+  row.className = 'row';
+  if (item.status === 'done'){
+    const a = document.createElement('a');
+    a.className = 'btn primary';
+    a.href = item.url;
+    a.download = item.base + '.webp';
+    a.textContent = 'Descargar';
+    row.appendChild(a);
+  }
+  const rm = document.createElement('button');
+  rm.textContent = 'Quitar';
+  rm.addEventListener('click', () => removeItem(item));
+  row.appendChild(rm);
+  body.appendChild(row);
+
+  el.append(thumb, body);
+  return el;
+}
+
+function renderAll(){
+  const grid = $('#grid');
+  grid.replaceChildren(...state.items.map(buildCard));
+  updateSummary();
+}
+function updateCard(item){
+  const old = document.querySelector('.card[data-id="' + item.id + '"]');
+  if (!old) return;
+  old.replaceWith(buildCard(item));
+}
+function updateSummary(){
+  const done = state.items.filter(i => i.status === 'done');
+  const orig = done.reduce((s, i) => s + i.file.size, 0);
+  const now = done.reduce((s, i) => s + i.blob.size, 0);
+  $('#summary').classList.toggle('show', state.items.length > 0);
+  $('#sCount').textContent = state.items.length;
+  $('#sOrig').textContent = fmt(orig);
+  $('#sNew').textContent = fmt(now);
+  const save = orig ? (1 - now / orig) * 100 : 0;
+  $('#sSave').textContent = (save >= 0 ? '' : '+') + Math.abs(save).toFixed(0) + '%';
+  $('#zip').disabled = done.length === 0;
+}
+function freeItem(item){
+  if (item.url) URL.revokeObjectURL(item.url);
+  if (item.origUrl) URL.revokeObjectURL(item.origUrl);
+  if (item.bitmap && item.bitmap.close) item.bitmap.close();
+}
+function removeItem(item){
+  freeItem(item);
+  state.items = state.items.filter(i => i !== item);
+  renderAll();
+}
+
+/* ---------- ZIP ---------- */
+function loadJSZip(){
+  if (window.JSZip) return Promise.resolve();
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js';
+    s.onload = resolve;
+    s.onerror = () => reject(new Error('No se pudo cargar el generador de ZIP'));
+    document.head.appendChild(s);
+  });
+}
+$('#zip').addEventListener('click', async () => {
+  const btn = $('#zip');
+  const done = state.items.filter(i => i.status === 'done');
+  if (!done.length) return;
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Preparando ZIP...';
+  try {
+    await loadJSZip();
+    const zip = new JSZip();
+    const used = new Set();
+    for (const it of done){
+      let n = it.base + '.webp', k = 2;
+      while (used.has(n)) n = it.base + '-' + (k++) + '.webp';
+      used.add(n);
+      zip.file(n, it.blob);
+    }
+    const out = await zip.generateAsync({ type: 'blob', compression: 'STORE' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(out);
+    a.download = 'imagenes-webp.zip';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) {
+    alert(e.message || 'No se pudo crear el ZIP');
+  } finally {
+    btn.textContent = label;
+    updateSummary();
+  }
+});
+$('#clear').addEventListener('click', () => {
+  state.items.forEach(freeItem);
+  state.items = [];
+  renderAll();
+});
+
+/* ---------- controles ---------- */
+$('#q').addEventListener('input', e => {
+  state.quality = +e.target.value;
+  $('#qOut').textContent = state.quality;
+  clearTimeout(timer);
+  timer = setTimeout(() => processAll(true), 250);
+});
+$('#w').addEventListener('change', e => {
+  state.maxW = +e.target.value;
+  processAll(true);
+});
+
+/* ---------- drag, click y pegar ---------- */
+const drop = $('#drop');
+$('#file').addEventListener('change', e => { addFiles(e.target.files); e.target.value = ''; });
+['dragenter', 'dragover'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.add('over'); }));
+['dragleave', 'drop'].forEach(t => drop.addEventListener(t, e => { e.preventDefault(); drop.classList.remove('over'); }));
+drop.addEventListener('drop', e => addFiles(e.dataTransfer.files));
+drop.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' '){ e.preventDefault(); $('#file').click(); } });
+window.addEventListener('dragover', e => e.preventDefault());
+window.addEventListener('drop', e => { e.preventDefault(); if (!drop.contains(e.target)) addFiles(e.dataTransfer.files); });
+window.addEventListener('paste', e => { if (e.clipboardData && e.clipboardData.files.length) addFiles(e.clipboardData.files); });
+</script>
+</body>
+</html>
